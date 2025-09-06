@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Import models
+model Flower {
+  id Int @id @default(autoincrement())
+
+  name String
+
+  color String?
+
+  price Float
+
+  createdAt DateTime @default(now())
+  update    DateTime @updatedAt
+}

@@ -14,11 +14,6 @@ import { FlowersGqlModule } from './flowers-gql/flowers-gql.module';
 
 @Module({
   imports: [
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      sortSchema: true,
-    }),
     ConfigModule.forRoot({ isGlobal: true }),
     FlowersModule,
     UsersModule,

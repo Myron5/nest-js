@@ -1,7 +1,6 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 
 import { AppService } from './app.service';
-import { CustomParseIntPipe } from './common/Pipes/CustomParseIntPipe';
 
 @Controller('hello')
 export class AppController {
@@ -18,7 +17,7 @@ export class AppController {
   }
 
   @Get(':id')
-  getHelloId(@Param('id', CustomParseIntPipe) id: number): string {
+  getHelloId(@Param('id', ParseIntPipe) id: number): string {
     return this.appService.getHelloId(id);
   }
 }

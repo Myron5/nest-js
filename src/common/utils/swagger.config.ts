@@ -24,7 +24,6 @@ export const setSwagger = <T extends INestApplication>(
     .setTitle(options.title)
     .setDescription(options.description)
     .setVersion(options.version)
-    .addTag('cats')
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);

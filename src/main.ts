@@ -16,6 +16,11 @@ async function bootstrap() {
     }),
   );
 
+  const baseUrl = `http://${process.env.MODE === 'dev' ? 'localhost' : ''}:${process.env.PORT ?? 3000}`;
+  console.log('App works on: ', baseUrl + '/api');
+  console.log('Health check route: ', baseUrl + '/api/hello');
+  console.log('Swagger works on: ', baseUrl + '/docs#');
+  console.log('GraphQL playground: ', baseUrl + '/graphql');
   await app.listen(process.env.PORT ?? 3000);
 }
 

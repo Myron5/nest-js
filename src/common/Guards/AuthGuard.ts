@@ -8,14 +8,6 @@ import {
 
 import { Request } from 'express';
 
-// export const AuthGuardLevels = {
-//   USER: 'user',
-//   ADMIN: 'admin',
-// } as const;
-
-// export type AuthGuardLevel =
-//   (typeof AuthGuardLevels)[keyof typeof AuthGuardLevels];
-
 export enum AuthGuardLevels {
   UNAUTHORIZED = 0,
   USER = 1,

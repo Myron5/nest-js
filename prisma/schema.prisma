@@ -8,16 +8,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Import models
 model Flower {
   id Int @id @default(autoincrement())
 
   name String
 
-  color String?
+  // null !== null. Thets why @@unique([name, color])   is useless with ? (unreqired)
+  color String @default("")
 
   price Float
 
   createdAt DateTime @default(now())
   update    DateTime @updatedAt
+
+  @@unique([name, color])
 }

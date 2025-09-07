@@ -1,5 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+import { Type } from 'class-transformer';
 import {
+  IsEmpty,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -8,6 +11,9 @@ import {
 } from 'class-validator';
 
 export class CreateFlowerDto {
+  @IsEmpty()
+  id?: any;
+
   @ApiProperty({
     description: 'Name of Flower',
     example: 'Rose',
@@ -22,7 +28,6 @@ export class CreateFlowerDto {
   })
   @IsOptional()
   @IsString()
-  @IsNotEmpty()
   color?: string;
 
   @ApiProperty({

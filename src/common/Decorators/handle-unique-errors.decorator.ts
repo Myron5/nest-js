@@ -1,4 +1,8 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 
 export function UniqueError(): MethodDecorator {
   return function (target, propertyKey, descriptor: PropertyDescriptor) {
@@ -6,7 +10,11 @@ export function UniqueError(): MethodDecorator {
 
     descriptor.value = async function (...args: any[]) {
       try {
-        return await originalMethod.apply(this, args);
+        const res = await originalMethod.apply(this, args);
+        if (res === null) {
+          throw new NotFoundException();
+        }
+        return res;
       } catch (error) {
         // If prisma db return unique error (P2002)
         // server will return 409 instead of 500

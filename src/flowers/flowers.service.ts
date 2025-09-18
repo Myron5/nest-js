@@ -5,97 +5,129 @@ import { UniqueError } from 'src/common/Decorators/handle-unique-errors.decorato
 import { PrismaService } from 'src/prisma.service';
 
 import { CreateFlowerDto } from './dto/create-flower.dto';
-import {
-  UpdateFlowerDto,
-  UpdateFlowerWithIdDto,
-} from './dto/update-flower.dto';
+import { UpdateFlowerWithIdDto } from './dto/update-flower.dto';
 
 @Injectable()
 export class FlowersService {
   constructor(private readonly prisma: PrismaService) {}
 
   @UniqueError()
-  create(dtos: CreateFlowerDto): Promise<Flower> {
-    return this.prisma.flower.create({ data: dtos });
+  async create(dtos: CreateFlowerDto): Promise<Flower> {
+    return await this.prisma.flower.create({ data: dtos });
   }
 
   @UniqueError()
-  createMany(dtos: CreateFlowerDto[]): Promise<Flower[]> {
-    // return this.prisma.flower.createMany({
-    //   data: dto,
-    //   skipDuplicates: true,
-    // });
-    // Answear in this case {"count": 2}
+  async createMany(dtos: CreateFlowerDto[]): Promise<Flower[]> {
+    // return this.prisma.flower.createMany({data: dto, skipDuplicates: true }); // ==> {"count": 2}
+    // return await this.prisma.$transaction(tx => dtos.map((item) => tx.flower.create({ data: item }))  );
 
-    return this.prisma.$transaction(
-      dtos.map((item) => this.prisma.flower.create({ data: item })),
+    const results = await Promise.allSettled(
+      dtos.map((dto) => this.prisma.flower.create({ data: dto })),
     );
-    // Answear in this case [{...dataFlower1}, ...]
+
+    const successfulUpdates = results
+      .filter(
+        (result): result is PromiseFulfilledResult<Flower> =>
+          result.status === 'fulfilled',
+      )
+      .map((result) => result.value);
+
+    return successfulUpdates;
   }
 
-  findAll(): Promise<Flower[]> {
-    return this.prisma.flower.findMany();
+  async findAll(): Promise<Flower[]> {
+    return await this.prisma.flower.findMany();
   }
 
-  findOne(id: number): Promise<Flower | null> {
-    return this.prisma.flower.findUnique({ where: { id } });
+  @UniqueError()
+  async findOne(id: number): Promise<Flower | null> {
+    return await this.prisma.flower.findUnique({ where: { id } });
   }
 
-  findMany(ids: number[]): Promise<Flower[] | null> {
+  async findMany(ids: number[]): Promise<Flower[]> {
     if (ids.length === 0) {
       return Promise.resolve([]);
     }
-
-    return this.prisma.flower.findMany({
+    return await this.prisma.flower.findMany({
       where: { id: { in: ids } },
     });
   }
 
   @UniqueError()
-  update(id: number, dto: UpdateFlowerDto): Promise<Flower | null> {
-    return this.prisma.flower.update({
+  async update(dto: UpdateFlowerWithIdDto): Promise<Flower | null> {
+    const { id, ...objToUpdate } = dto;
+
+    // findByIdAndUpdate  -  doesn't exist
+    const existing = await this.prisma.flower.findUnique({ where: { id } });
+
+    if (!existing) {
+      return null;
+    }
+
+    return await this.prisma.flower.update({
       where: { id },
-      data: dto,
+      data: objToUpdate,
     });
   }
 
   @UniqueError()
-  updateMany(objcts: UpdateFlowerWithIdDto[]): Promise<Flower[] | null> {
-    if (objcts.length === 0) {
+  async updateMany(dtos: UpdateFlowerWithIdDto[]): Promise<Flower[]> {
+    if (dtos.length === 0) {
       return Promise.resolve([]);
     }
 
-    return this.prisma.$transaction(
-      objcts.map(({ id, ...dto }) =>
-        this.prisma.flower.update({
-          where: { id },
-          data: dto,
-        }),
+    // this.prisma.flower.updateMany({})   =>   {count:2}
+
+    // return this.pgrisma.$transaction( objects.map
+    // Returns error for whole array of ids
+    // if one id is wrong
+
+    const results = await Promise.allSettled(
+      dtos.map(
+        async ({ id, ...objToUpdate }) =>
+          await this.prisma.flower.update({
+            where: { id },
+            data: objToUpdate,
+          }),
       ),
     );
+
+    const successfulUpdates = results
+      .filter(
+        (result): result is PromiseFulfilledResult<Flower> =>
+          result.status === 'fulfilled',
+      )
+      .map((result) => result.value);
+
+    return successfulUpdates;
   }
 
-  remove(id: number): Promise<Flower | null> {
-    return this.prisma.flower.delete({
+  @UniqueError()
+  async remove(id: number): Promise<Flower | null> {
+    const existing = await this.prisma.flower.findUnique({ where: { id } });
+    if (!existing) {
+      return null;
+    }
+    return await this.prisma.flower.delete({
       where: { id },
     });
   }
 
-  removeMany(ids: number[]): Promise<Flower[] | null> {
+  async removeMany(ids: number[]): Promise<Flower[] | null> {
     if (ids.length === 0) {
       return Promise.resolve([]);
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      const flowersToDelete = await tx.flower.findMany({
-        where: { id: { in: ids } },
-      });
-
-      await tx.flower.deleteMany({
-        where: { id: { in: ids } },
-      }); // Answear in this case {"count": 2}
-
-      return flowersToDelete;
+    const flowersToDelete = await this.prisma.flower.findMany({
+      where: { id: { in: ids } },
     });
+
+    await this.prisma.flower.deleteMany({
+      where: { id: { in: ids } },
+    }); // Answear in this case {"count": 2}
+
+    return flowersToDelete;
+
+    // return await this.prisma.$transaction(async (tx) => { tx = this.prisma });
   }
 }

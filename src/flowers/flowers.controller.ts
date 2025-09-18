@@ -68,7 +68,7 @@ export class FlowersController {
   @Patch(':id')
   @UseGuards(AuthGuard(ADMIN))
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateFlowerDto) {
-    return this.flowersService.update(id, dto);
+    return this.flowersService.update({ id, ...dto });
   }
 
   @Delete()

@@ -19,9 +19,11 @@ export function UniqueError(): MethodDecorator {
         // If prisma db return unique error (P2002)
         // server will return 409 instead of 500
         if (error.code === 'P2002') {
-          throw new ConflictException(
-            'Flower with this name and this color already exists',
-          );
+          throw new ConflictException('Record already exists');
+        }
+
+        if (error.code === 'P2025') {
+          throw new NotFoundException('Record not found');
         }
 
         // Prisma validation error (Wrong request from DB)

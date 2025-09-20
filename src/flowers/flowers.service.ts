@@ -12,8 +12,8 @@ export class FlowersService {
   constructor(private readonly prisma: PrismaService) {}
 
   @UniqueError()
-  async create(dtos: CreateFlowerDto): Promise<Flower> {
-    return await this.prisma.flower.create({ data: dtos });
+  async create(dto: CreateFlowerDto): Promise<Flower> {
+    return await this.prisma.flower.create({ data: dto });
   }
 
   @UniqueError()

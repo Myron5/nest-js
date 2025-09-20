@@ -42,7 +42,7 @@ export class FlowersController {
 
   @Get()
   @UseGuards(AuthGuard(USER))
-  findMany(@Query('ids', ParseIntArrayPipe) ids: number[]) {
+  findAllOrMany(@Query('ids', ParseIntArrayPipe) ids: number[]) {
     if (ids === undefined) {
       // if there is no ids, ===> then its findAll
       return this.flowersService.findAll();

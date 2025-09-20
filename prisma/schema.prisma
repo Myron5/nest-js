@@ -3,6 +3,10 @@ generator client {
   // output   = "../generated/prisma"
 }
 
+// npx prisma generate
+// npx prisma migrate
+// npm prisma db push
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -11,15 +15,48 @@ datasource db {
 model Flower {
   id Int @id @default(autoincrement())
 
-  name String
-
-  // null !== null. Thets why @@unique([name, color])   is useless with ? (unreqired)
+  name  String
+  // null !== null. Thфts why @@unique([name, color])   is useless with ? (unreqired)
   color String @default("")
-
   price Float
 
   createdAt DateTime @default(now())
-  update    DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
   @@unique([name, color])
+  @@map("flowers")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique @db.VarChar(100)
+  name     String @db.VarChar(50)
+  password String @db.VarChar(60) // hash pass (bcrypt)
+
+  role      String   @db.VarChar(30)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Optional
+  phone  String? @db.VarChar(20)
+  avatar String? @db.VarChar(255)
+
+  isDeleted     Boolean        @default(false)
+  deletedAt     DateTime?
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique @db.VarChar(255)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("refresh_tokens")
 }

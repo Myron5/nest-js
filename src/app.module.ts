@@ -4,12 +4,14 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { LoggerMiddleware } from './common/Middlewares/LoggerMiddleware';
-import { FlowersModule } from './flowers/flowers.module';
 import { FlowersGqlModule } from './flowers-gql/flowers-gql.module';
+import { FlowersModule } from './flowers/flowers.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { FlowersGqlModule } from './flowers-gql/flowers-gql.module';
     ConfigModule.forRoot({ isGlobal: true }),
     FlowersModule,
     FlowersGqlModule,
+    AuthModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],
